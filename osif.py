@@ -90,7 +90,7 @@ def create_token(token: str) -> str:
         if not ask or ask == "n":
             return token
 
-    print(f"\n[!]{Fore.RED} PLEASE NOT THAT I DO NOT STEAL YOUR PASSWORD{Style.RESET_ALL}")
+    print(f"\n[!]{Fore.RED} PLEASE NOTE THAT I DO NOT STEAL YOUR PASSWORD{Style.RESET_ALL}")
     print("[!] Read the code if you don't believe me ;)")
     username = input("[?] Username: ")
     password = getpass(prompt="[?] Password: ")
