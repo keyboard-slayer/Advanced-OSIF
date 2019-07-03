@@ -4,6 +4,7 @@
 import os
 import json
 import requests
+import urllib.request
 
 from colorama import (
     Fore,
@@ -13,21 +14,46 @@ from colorama import (
 from hashlib import md5
 from typing import Dict
 from getpass import getpass
+from bs4 import BeautifulSoup
 
 
-def get_mail(token: str):
+
+def get_name(token: str) -> str:
+    request = requests.get(f"https://graph.facebook.com/me?access_token={token}")
+    return '-'.join(json.loads(request.text)["name"].split(' '))
+
+def dump_profile(token: str):
+    if not token:
+        print(f"[*] {Fore.RED}YOU NEED TO LOGIN FOR THIS FUNCTIONALITY !{Style.RESET_ALL}")
+        return -1
+    id = int(input("\n[?] ID of the profile to dump: "))
+    request = requests.get(f"https://graph.facebook.com/{id}?access_token={token}")
+    data = json.loads(request.text)
+    print(f"\n\n\n{data}\n\n\n")
+
+
+def get_friend(token: str):
     if not token:
         print(f"[*] {Fore.RED}YOU NEED TO LOGIN FOR THIS FUNCTIONALITY !{Style.RESET_ALL}")
         return -1
 
     request = requests.get(f"https://graph.facebook.com/me/friends?access_token={token}")
     data = json.loads(request.text)
-    print(data)
-
+    datas = []
     for friend in data["data"]:
-        print(friend['id'])
         request = requests.get(f"https://graph.facebook.com/{friend['id']}?access_token={token}")
-        mail = json.loads(request.text)
+        data = json.loads(request.text)
+        datas.append(f"{str(data)}\n\n\n")
+        print(data["name"])
+
+    if not os.path.isdir("output"):
+        os.mkdir("output")
+
+    with open(os.path.join("output", f"{get_name(token)}-friend.txt"), 'w') as file:
+        file.writelines(datas)
+
+    print(f"Saved on {os.path.join('output', f'{get_name(token)}-friend.txt')}")
+
 
 def get_token(username: str, password: str):
     # === NUMBERS FROM https://github.com/CiKu370/OSIF ===
@@ -60,18 +86,18 @@ def get_token(username: str, password: str):
 def create_token(token: str) -> str:
     if token:
         print(f"[*] {Fore.RED}WARNING{Style.RESET_ALL} : A token is already registered")
-        ask = input("[?] Are you sure to continue ? [y/N]")
+        ask = input("[?] Are you sure to continue ? [y/N] ")
         if not ask or ask == "n":
             return token
-    else:
-        print(f"\n[!]{Fore.RED} PLEASE NOT THAT I DO NOT STEAL YOUR PASSWORD{Style.RESET_ALL}")
-        print("[!] Read the code if you don't believe me ;)")
-        username = input("[?] Username: ")
-        password = getpass(prompt="[?] Password: ")
-        token = get_token(username, password)
 
-        with open(".token", "w") as token_file:
-            token_file.write(token)
+    print(f"\n[!]{Fore.RED} PLEASE NOT THAT I DO NOT STEAL YOUR PASSWORD{Style.RESET_ALL}")
+    print("[!] Read the code if you don't believe me ;)")
+    username = input("[?] Username: ")
+    password = getpass(prompt="[?] Password: ")
+    token = get_token(username, password)
+
+    with open(".token", "w") as token_file:
+        token_file.write(token)
 
 
 
@@ -99,7 +125,7 @@ def asciiArt(logged: bool):
                          (                -;    '-'
                           `-----------.___~;
 
-                                Facebook Mail
+                                Advanced OSIF
                                   {"Logged In" if logged else ""}
                                    0v3rl0w
           """)
@@ -121,6 +147,15 @@ if __name__ == "__main__":
 
         if user_input.lower() == "login":
             token = create_token(token)
+            exit()
 
-        if user_input.lower() == "dump_mail":
-            get_mail(token)
+        if user_input.lower() == "dump_friend":
+            get_friend(token)
+
+        if user_input.lower() == "dump_profile":
+            dump_profile(token)
+
+        if user_input.lower() == "help":
+            print("\tlogin\t\t\tGet your infos")
+            print("\tdump_friend\t\tDump all your friend's info")
+            print("\tdump_profile\t\tDump someone's info with their ID")
