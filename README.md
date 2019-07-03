@@ -10,4 +10,5 @@
 [link-icon-computer]: https://img.shields.io/badge/%F0%9F%92%BB-Buy%20me%20a%20new%20laptop-aa0000.svg
 [link-computer]: https://www.paypal.me/0v3rl0w/2000eur
 Advanced Open Source Information Facebook
+
 (By the way, more advanced than this, you die)
